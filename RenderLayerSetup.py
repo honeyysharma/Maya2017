@@ -1,12 +1,12 @@
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 from PySide2 import QtWidgets, QtCore
-from RenderLayerController import RenderLayerController
+from RLManager import RLManager
 import maya.cmds as cmds
 
-class CustomLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
-    def __init__(self, parent, renderLayerController):
-        super(CustomLayerSetup, self).__init__(parent=parent)
-        self.renderLayerController = renderLayerController
+class CustomDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
+    def __init__(self, parent, RLManager):
+        super(CustomDialog, self).__init__(parent=parent)
+        self.RLManager = RLManager
         self.generateUI()
         
     def generateUI(self):
@@ -18,12 +18,7 @@ class CustomLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.lblLayerType = QtWidgets.QLabel('Layer Type:')
         
         self.comboLayerType = QtWidgets.QComboBox()
-        self.comboLayerType.setEditable(True)
-        self.comboLayerType.lineEdit().setReadOnly(True)
-        self.comboLayerType.lineEdit().setAlignment(QtCore.Qt.AlignCenter)
-        self.comboLayerType.addItems(['- SELECT -', 'ENVIR', 'CHAR'])
-        for i in range(self.comboLayerType.count()):
-            self.comboLayerType.setItemData(i, QtCore.Qt.AlignCenter, QtCore.Qt.TextAlignmentRole)
+        self.comboLayerType.addItems(['          - SELECT -', 'ENVIR', 'CHAR'])
         
         self.cutOutCheckBox = QtWidgets.QCheckBox("With Holdouts")
         self.cutOutCheckBox.setChecked(False)
@@ -54,21 +49,21 @@ class CustomLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
                 if "CHAR" in parentList:
                     QtWidgets.QMessageBox.information(self, "Alert", "CHAR type asset selected to create ENVIR layer!")
                 else:
-                    self.renderLayerController.createCustomEnvirLayer(layerName, self.cutOutCheckBox.isChecked())
+                    self.RLManager.createCustomEnvirLayer(layerName, self.cutOutCheckBox.isChecked())
             else:
                 if "ENVIR" in parentList:
                     QtWidgets.QMessageBox.information(self, "Alert", "ENVIR type asset selected to create ENVIR layer!")
                 else:
-                    self.renderLayerController.createCustomCharLayer(layerName, self.cutOutCheckBox.isChecked())
+                    self.RLManager.createCustomCharLayer(layerName, self.cutOutCheckBox.isChecked())
         
 
-class RenderLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
+class RLSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     def __init__(self, parent=None):
-        super(RenderLayerSetup, self).__init__(parent=parent)
+        super(RLSetup, self).__init__(parent=parent)
         self.setMinimumSize(QtCore.QSize(450, 200))
         self.showCustomLayer = 0
-        self.renderLayerController = RenderLayerController()
-        self.customLayer = CustomLayerSetup(self, self.renderLayerController)
+        self.RLManager = RLManager()
+        self.customLayer = CustomDialog(self, self.RLManager)
         self.toggleAnimation()
         self.initUI()
         
@@ -105,10 +100,6 @@ class RenderLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         
         self.btnCustom = QtWidgets.QPushButton('ADD MORE LAYERS', self)
         self.btnCustom.clicked.connect(self.toggleAnimation)
-        
-        #self.btnCancelCustomLayer = QtGui.QPushButton('Cancel', self)
-        #self.btnCancelCustomLayer.move(20, 20)
-        #self.btnCancelCustomLayer.clicked.connect(self.hideCustomLayerWidget)
         
         #create grid layout to add buttons
         defaultBtnGridLayout = QtWidgets.QGridLayout()
@@ -151,9 +142,9 @@ class RenderLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             self.showCustomLayer = 0
    
     def createEnvirLayer(self):
-        self.renderLayerController.createEnvirLayer("ENVIR")
+        self.RLManager.createEnvirLayer("ENVIR")
         
     def createCharLayer(self):
-        self.renderLayerController.createCharLayer("CHAR")
+        self.RLManager.createCharLayer("CHAR")
         
-test = RenderLayerSetup()
+test = RLSetup()
