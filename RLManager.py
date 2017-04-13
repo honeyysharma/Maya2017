@@ -1,13 +1,12 @@
 import sys
 from RenderLayers import EnvirLayer, CharLayer
 
-class RenderLayerController(object):
+class RLManager(object):
     def __init__(self):
         pass
         
     def createEnvirLayer(self, layerName):
         layer = EnvirLayer(layerName)
-        #layer.createCollectionForAllLights()
         layer.turnOffCharLights()
         layer.turnOffAllChar(False)
         layer.createAllEnvirCollection()
@@ -15,7 +14,6 @@ class RenderLayerController(object):
     
     def createCharLayer(self, layerName):
         layer = CharLayer(layerName)
-        #layer.createCollectionForAllLights()
         layer.turnOffEnvirLights()
         layer.turnOffAllEnvir(True)
         layer.createAllCharCollection()
@@ -23,7 +21,6 @@ class RenderLayerController(object):
         
     def createCustomEnvirLayer(self, layerName, isCutoutChecked):
         layer = EnvirLayer(layerName)
-        #layer.createCollectionForAllLights()
         layer.turnOffCharLights()
         
         #toggle only Envir cutout
@@ -35,7 +32,6 @@ class RenderLayerController(object):
         
     def createCustomCharLayer(self, layerName, isCutoutChecked):
         layer = CharLayer(layerName)
-        #layer.createCollectionForAllLights()
         layer.turnOffEnvirLights()
         layer.turnOffAllEnvir(True)
         
