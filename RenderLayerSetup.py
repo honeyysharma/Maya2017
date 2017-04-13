@@ -18,13 +18,17 @@ class CustomLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.lblLayerType = QtWidgets.QLabel('Layer Type:')
         
         self.comboLayerType = QtWidgets.QComboBox()
-        self.comboLayerType.addItems(['ENVIR', 'CHAR'])
+        self.comboLayerType.setEditable(True)
+        self.comboLayerType.lineEdit().setReadOnly(True)
+        self.comboLayerType.lineEdit().setAlignment(QtCore.Qt.AlignCenter)
+        self.comboLayerType.addItems(['- SELECT -', 'ENVIR', 'CHAR'])
+        for i in range(self.comboLayerType.count()):
+            self.comboLayerType.setItemData(i, QtCore.Qt.AlignCenter, QtCore.Qt.TextAlignmentRole)
         
-        self.cutOutCheckBox = QtWidgets.QCheckBox("With Cutouts")
+        self.cutOutCheckBox = QtWidgets.QCheckBox("With Holdouts")
         self.cutOutCheckBox.setChecked(False)
         
-        self.btnAddLayer = QtWidgets.QPushButton('Add', self)
-        self.btnAddLayer.move(20, 20)
+        self.btnAddLayer = QtWidgets.QPushButton('Add Layer', self)
         self.btnAddLayer.clicked.connect(self.createCustomLayer)
         
         #grid layout for adding custom widgets
@@ -61,8 +65,11 @@ class CustomLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 class RenderLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(RenderLayerSetup, self).__init__(parent=parent)
+        self.setMinimumSize(QtCore.QSize(450, 200))
         self.showCustomLayer = 0
         self.renderLayerController = RenderLayerController()
+        self.customLayer = CustomLayerSetup(self, self.renderLayerController)
+        self.toggleAnimation()
         self.initUI()
         
     def initUI(self):
@@ -70,32 +77,33 @@ class RenderLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         vbox = QtWidgets.QVBoxLayout()
         
         #top frame
-        topFrame = QtWidgets.QFrame()
-        topFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        defaultGroupBox = QtWidgets.QGroupBox()
+        #defaultGroupBox.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        defaultGroupBox.setTitle("Default")
+        defaultGroupBox.setStyleSheet("QGroupBox { background-color: rgb(50, 50, 50); border:1px solid rgb(0, 0, 0); }")
         
         #bottom frame
-        bottomFrame = QtWidgets.QFrame()
-        bottomFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        
+        customGroupBox = QtWidgets.QGroupBox()
+        #customGroupBox.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        customGroupBox.setTitle("Custom")
+        customGroupBox.setStyleSheet("QGroupBox { background-color: rgb(50, 50, 50); border:1px solid rgb(0, 0, 0); }")
+
         #split window and add frame
-        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(topFrame)
-        splitter.addWidget(bottomFrame)
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+        splitter.addWidget(defaultGroupBox)
+        splitter.addWidget(customGroupBox)
         
         #add splitter to main layout
         vbox.addWidget(splitter)
         
         #create default layer buttons
-        self.btnEnvir = QtWidgets.QPushButton('ENVIR', self)
-        self.btnEnvir.move(20, 20)
+        self.btnEnvir = QtWidgets.QPushButton('ADD ALL ENVIR LAYER', self)
         self.btnEnvir.clicked.connect(self.createEnvirLayer)
         
-        self.btnChar = QtWidgets.QPushButton('CHAR', self)
-        self.btnChar.move(20, 20)
+        self.btnChar = QtWidgets.QPushButton('ADD ALL CHAR LAYER', self)
         self.btnChar.clicked.connect(self.createCharLayer)
         
-        self.btnCustom = QtWidgets.QPushButton('Custom', self)
-        self.btnCustom.move(20, 20)
+        self.btnCustom = QtWidgets.QPushButton('ADD MORE LAYERS', self)
         self.btnCustom.clicked.connect(self.toggleAnimation)
         
         #self.btnCancelCustomLayer = QtGui.QPushButton('Cancel', self)
@@ -105,20 +113,21 @@ class RenderLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         #create grid layout to add buttons
         defaultBtnGridLayout = QtWidgets.QGridLayout()
         defaultBtnGridLayout.addWidget(self.btnEnvir, 0, 0)
-        defaultBtnGridLayout.addWidget(self.btnChar, 0, 1)
+        defaultBtnGridLayout.addWidget(self.btnChar, 1, 0)
         
         #set grid layout for top frame
-        topFrame.setLayout(defaultBtnGridLayout)
+        defaultGroupBox.setLayout(defaultBtnGridLayout)
         
-        self.customLayer = CustomLayerSetup(self, self.renderLayerController)
-        self.toggleAnimation()
+
         #vertical layout for bottom frame
         vboxCustom = QtWidgets.QVBoxLayout()
+        vboxCustom.addStretch(1)
         vboxCustom.addWidget(self.btnCustom)
+        vboxCustom.addStretch(1)
         vboxCustom.addWidget(self.customLayer)
         
         #set vertical layout for bottom frame
-        bottomFrame.setLayout(vboxCustom)
+        customGroupBox.setLayout(vboxCustom)
         
         self.setLayout(vbox)
         self.setGeometry(300, 300, 300, 100)
@@ -135,7 +144,7 @@ class RenderLayerSetup(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             self.animation.start()
             self.showCustomLayer = 1
         else:
-            self.animation.setDuration(300)
+            self.animation.setDuration(200)
             self.animation.setStartValue(0)
             self.animation.setEndValue(100)
             self.animation.start()
